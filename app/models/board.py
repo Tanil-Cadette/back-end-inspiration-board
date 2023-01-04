@@ -3,7 +3,6 @@ from app import db
 class Board(db.Model):
     board_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
-    card_id = db.Column(db.Integer, db.ForeignKey('card.card_id'))
     cards= db.relationship("Card", back_populates="board")
     
     
@@ -24,4 +23,4 @@ class Board(db.Model):
         try:
             self.title= req_body["title"]
         except KeyError as error:
-            raise error
+            raise error 
