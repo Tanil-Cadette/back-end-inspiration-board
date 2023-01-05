@@ -30,7 +30,7 @@ def create_board():
     try:
         new_board= Board.from_dict(request_body)
     except KeyError:
-        if "title" not in request_body:
+        if "title" not in request_body or "owner" not in request_body:
             return make_response({"message": "invalid key"}, 400)
     
     new_board= Board.from_dict(request_body)
@@ -125,4 +125,5 @@ def read_board_cards(board_id):
         cards_id.append(card_dict)
         
     response_dict= board.to_dict()
+    response_dict["cards"]= cards_id
     return jsonify(response_dict), 200

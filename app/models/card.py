@@ -6,7 +6,6 @@ class Card(db.Model):
     message = db.Column(db.String)
     # likes_count = db.Column(db.Integer, default=0)
     # color = db.Column(db.String)
-    # board_id = db.Column(db.Integer, db.ForeignKey("board.board_id"))
     board_id= db.Column(db.Integer, db.ForeignKey('board.board_id'))
     board = db.relationship("Board", back_populates="cards")
     
@@ -19,13 +18,6 @@ class Card(db.Model):
             card_dict["board_id"]= self.board_id
         
         return card_dict
-            # return {
-            #     "id": self.card_id,
-            #     "message": self.message,
-            #     "likes_count": self.likes_count,
-            #     "color": self.color,
-            #     "board_id": self.board_id
-            # }
     
     def update_likes(self, request_body):
         try:
@@ -39,8 +31,3 @@ class Card(db.Model):
         
         return new_card
     
-        # new_card = cls(
-        #     message = request_body["message"],
-        #     color = request_body["color"],
-        # )
-        # return new_card
