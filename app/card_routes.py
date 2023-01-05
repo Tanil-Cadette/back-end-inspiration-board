@@ -81,8 +81,9 @@ def delete_one_card(card_id):
 @cards_bp.route("<card_id>", methods=["PATCH"])
 def edit_card_likes(card_id):
     card = validate_id(Card, card_id)
-
-    card.likes_count += 1
+    if card.likes_count== None:
+        card.likes_count = 0
+    card.likes_count+=1
 
     db.session.commit()
 

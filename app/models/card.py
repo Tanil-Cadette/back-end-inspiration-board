@@ -4,7 +4,7 @@ from flask import abort, make_response
 class Card(db.Model):
     card_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     message = db.Column(db.String)
-    # likes_count = db.Column(db.Integer, default=0)
+    likes_count = db.Column(db.Integer, default=0)
     # color = db.Column(db.String)
     board_id= db.Column(db.Integer, db.ForeignKey('board.board_id'))
     board = db.relationship("Board", back_populates="cards")
@@ -14,16 +14,11 @@ class Card(db.Model):
         card_dict= {}
         card_dict["card_id"]= self.card_id
         card_dict["message"]= self.message
+        card_dict["likes_count"]= self.likes_count
         if self.board_id:
             card_dict["board_id"]= self.board_id
         
         return card_dict
-    
-    def update_likes(self, request_body):
-        try:
-            self.likes_count = request_body["likes_count"]
-        except KeyError as error:
-            abort(make_response({'message': f"Missing attribute: {error}"}))
     
     @classmethod
     def create(cls, request_body):
