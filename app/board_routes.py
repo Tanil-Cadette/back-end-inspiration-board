@@ -40,7 +40,7 @@ def create_board():
     db.session.commit()
     result = new_board.to_dict()
 
-    return make_response(jsonify({"title": result}), 201)
+    return make_response(jsonify(result), 201)
 
 
 # __________________________________________________________________________________________________________
