@@ -35,5 +35,5 @@ def create_app(test_config=None):
     from .card_routes import cards_bp
     app.register_blueprint(cards_bp)
 
-    # CORS(app)
+    CORS(app)
     return app
