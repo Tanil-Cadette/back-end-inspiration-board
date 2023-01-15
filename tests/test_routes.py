@@ -12,8 +12,8 @@ def get_boards_no_saved_boards(client):
     assert response.status_code == 200
     assert response_body == []
 
-def get_one_board(client):
-    pass
+# def get_one_board(client):
+#     pass
 
 # CARD TESTS
 def test_delete_one_card(client, create_one_card):
