@@ -28,19 +28,13 @@ def validate_id(class_name, id):
 @cards_bp.route("", methods=["POST"])
 def create_card():
     request_body = request.get_json()
-    try:
-        new_card = Card.create(request_body)
-    except:
-        if "message" not in request_body:
-            return make_response({"details": "Invalid data"}, 400)
 
-    new_card = Card.create(request_body)
-
+    new_card = Card.from_dict(request_body)
     db.session.add(new_card)
     db.session.commit()
-    card_dict = new_card.to_json()
 
-    return make_response(jsonify({"card": card_dict}), 201)
+    result = new_card.to_dict()
+    return make_response(jsonify({"card": result}), 201)
 
 
 # ==================================
@@ -48,11 +42,8 @@ def create_card():
 # ==================================
 @cards_bp.route("", methods=["GET"])
 def get_cards():
-    cards_response = []
     cards = Card.query.all()
-
-    for card in cards:
-        cards_response.append(card.to_json())
+    cards_response = [card.to_dict() for card in cards]
 
     return jsonify(cards_response), 200
 
@@ -60,7 +51,7 @@ def get_cards():
 @cards_bp.route("/<card_id>", methods=["GET"])
 def get_one_card(card_id):
     card = validate_id(Card, card_id)
-    card_dict = card.to_json()
+    card_dict = card.to_dict()
 
     return jsonify({"card": card_dict})
 
@@ -84,13 +75,9 @@ def delete_one_card(card_id):
 @cards_bp.route("<card_id>", methods=["PATCH"])
 def edit_card_likes(card_id):
     card = validate_id(Card, card_id)
-    if card.likes_count == None:
-        card.likes_count = 0
     card.likes_count += 1
-
     db.session.commit()
-
-    return jsonify(card.to_json()), 200
+    return jsonify(card.to_dict()), 200
 
 
 @cards_bp.errorhandler(IntegrityError)
