@@ -3,6 +3,7 @@ from app import db
 from app.models.board import Board
 from app.models.card import Card
 
+from sqlalchemy.exc import IntegrityError
 
 boards_bp = Blueprint("boards", __name__, url_prefix="/boards")
 
@@ -28,18 +29,11 @@ def validate_model(cls, model_id):
 def create_board():
     request_body = request.get_json()
 
-    try:
-        new_board = Board.from_dict(request_body)
-    except KeyError:
-        if "title" not in request_body or "owner" not in request_body:
-            return make_response({"message": "invalid key"}, 400)
-
     new_board = Board.from_dict(request_body)
-
     db.session.add(new_board)
     db.session.commit()
-    result = new_board.to_dict()
 
+    result = new_board.to_dict()
     return make_response(jsonify(result), 201)
 
 
@@ -131,3 +125,8 @@ def read_board_cards(board_id):
     response_dict = board.to_dict()
     response_dict["cards"] = cards_id
     return jsonify(response_dict), 200
+
+
+@boards_bp.errorhandler(IntegrityError)
+def handle_invalid_data(e):
+    return make_response({"message": "invalid or incomplete board data"}, 400)

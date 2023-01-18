@@ -1,4 +1,5 @@
 from app import db
+from sqlalchemy.orm import validates
 
 
 class Board(db.Model):
@@ -7,23 +8,25 @@ class Board(db.Model):
     owner = db.Column(db.String, nullable=False)
     cards = db.relationship("Card", back_populates="board")
 
-    def to_dict(self):
-        board_dict = {}
-        board_dict["board_id"] = self.board_id
-        board_dict["title"] = self.title
-        board_dict["owner"] = self.owner
+    @validates("title", "owner")
+    def no_empty_strings(self, key, value):
+        value = str(value).strip()
+        if not value:
+            raise ValueError(f"{key} must be a non-empty string.")
+        return value
 
-        return board_dict
+    def to_dict(self):
+        return {"board_id": self.board_id, "title": self.title, "owner": self.owner}
+
+    @classmethod
+    def filter_data(cls, board_data):
+        accepted_data = ("title", "owner")
+        return {field: board_data[field] for field in accepted_data}
 
     @classmethod
     def from_dict(cls, board_data):
-        new_board = Board(title=board_data["title"], owner=board_data["owner"])
+        return Board(**Board.filter_data(board_data))
 
-        return new_board
-
-    def update(self, req_body):
-        try:
-            self.title = req_body["title"]
-            self.owner = req_body["owner"]
-        except KeyError as error:
-            raise error
+    def update(self, board_data):
+        for field, value in Board.filter_data(board_data).items():
+            setattr(self, field, value)
