@@ -1,5 +1,4 @@
 from app import db
-from sqlalchemy.orm import validates
 
 
 class Board(db.Model):
@@ -8,7 +7,7 @@ class Board(db.Model):
     owner = db.Column(db.String, nullable=False)
     cards = db.relationship("Card", back_populates="board")
 
-    @validates("title", "owner")
+    @db.validates("title", "owner")
     def no_empty_strings(self, key, value):
         value = str(value).strip()
         if not value:
@@ -26,7 +25,3 @@ class Board(db.Model):
     @classmethod
     def from_dict(cls, board_data):
         return Board(**Board.filter_data(board_data))
-
-    def update(self, board_data):
-        for field, value in Board.filter_data(board_data).items():
-            setattr(self, field, value)
