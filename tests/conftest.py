@@ -25,7 +25,7 @@ def client(app):
 
 @pytest.fixture
 def create_one_board(app):
-    new_board = Board(title="Sample Board", owner="Grumpy Cat")
+    new_board = Board(title="Kitty Treats", owner="Grumpy Cat")
     db.session.add(new_board)
     db.session.commit()
 
