@@ -90,7 +90,7 @@ def delete_board(board_id):
     db.session.delete(board)
     db.session.commit()
 
-    return jsonify({"details": (f'Board {board_id} {board_dict["title"]} was deleted')})
+    return jsonify({"message": (f'Board {board_id} {board_dict["title"]} was deleted')})
 
 
 # ____________________________________________________________________________________________________________
