@@ -1,16 +1,21 @@
 from app import db
-from flask import abort, make_response
 
 
 class Card(db.Model):
     card_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     message = db.Column(db.String, nullable=False)
     likes_count = db.Column(db.Integer, default=0)
-    # color = db.Column(db.String)
-    board_id = db.Column(db.Integer, db.ForeignKey("board.board_id"))
+    board_id = db.Column(db.Integer, db.ForeignKey("board.board_id"), nullable=False)
     board = db.relationship("Board", back_populates="cards")
 
-    def to_json(self):
+    @db.validates("message")
+    def no_empty_strings(self, key, value):
+        value = str(value).strip()
+        if not value:
+            raise ValueError(f"{key} must be a non-empty string.")
+        return value
+
+    def to_dict(self):
         return {
             "card_id": self.card_id,
             "message": self.message,
@@ -19,5 +24,10 @@ class Card(db.Model):
         }
 
     @classmethod
-    def create(cls, request_body):
-        return Card(message=request_body["message"], board_id=request_body["board_id"])
+    def filter_data(cls, board_data):
+        accepted_data = ("message", "board_id")
+        return {field: board_data[field] for field in accepted_data}
+
+    @classmethod
+    def from_dict(cls, card_data):
+        return Card(**Card.filter_data(card_data))
