@@ -4,7 +4,7 @@ from flask import abort, make_response
 
 class Card(db.Model):
     card_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    message = db.Column(db.String)
+    message = db.Column(db.String, nullable=False)
     likes_count = db.Column(db.Integer, default=0)
     # color = db.Column(db.String)
     board_id = db.Column(db.Integer, db.ForeignKey("board.board_id"))
