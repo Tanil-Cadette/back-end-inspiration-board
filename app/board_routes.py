@@ -42,16 +42,14 @@ def create_board():
 # __________________________________________________________________________________________________________
 @boards_bp.route("", methods=["GET"])
 def get_boards():
-    board_list = []
     id_query = request.args.get("board_id")
 
-    if id_query:
+    if id_query:  # TODO: this seems broken?
         boards = Board.query.order_by(Board.board_id.asc()).all()
     else:
         boards = Board.query.all()
 
-    for board in boards:
-        board_list.append(board.to_dict())
+    board_list = [board.to_dict() for board in boards]
 
     return jsonify(board_list), 200
 
@@ -60,23 +58,14 @@ def get_boards():
 def get_one_board(board_id):
     board = validate_model(Board, board_id)
     board_dict = board.to_dict()
-
     return jsonify({"board": board_dict})
 
 
-# __________________________________________________________________________________________________________
-# --------------------------------UPDATE BOARD---------------------------------------------------------------
-# __________________________________________________________________________________________________________
-@boards_bp.route("/<board_id>", methods=["PUT"])
-def update_board(board_id):
+@boards_bp.route("/<board_id>/cards", methods=["GET"])
+def read_board_cards(board_id):
     board = validate_model(Board, board_id)
-    request_body = request.get_json()
-
-    board.update(request_body)
-    board_dict = board.to_dict()
-    db.session.commit()
-
-    return make_response(jsonify({"board": board_dict}))
+    response = [card.to_dict() for card in board.cards]
+    return jsonify(response), 200
 
 
 # ____________________________________________________________________________________________________________
@@ -91,40 +80,6 @@ def delete_board(board_id):
     db.session.commit()
 
     return jsonify({"message": (f'Board {board_id} {board_dict["title"]} was deleted')})
-
-
-# ____________________________________________________________________________________________________________
-# --------------------------------CARD & BOARD----------------------------------------------------------------
-# ____________________________________________________________________________________________________________
-@boards_bp.route("/<board_id>/cards", methods=["POST"])
-def create_board_cards(board_id):
-    board = validate_model(Board, board_id)
-    request_body = request.get_json()
-
-    cards_id = request_body["card_ids"]
-    board.cards = []
-
-    for id in cards_id:
-        board.cards.append(Card.query.get(id))
-
-    db.session.commit()
-    response = {"board": board.board_id, "cards": cards_id}
-
-    return jsonify(response), 200
-
-
-@boards_bp.route("/<board_id>/cards", methods=["GET"])
-def read_board_cards(board_id):
-    board = validate_model(Board, board_id)
-    cards_id = []
-
-    for card in board.cards:
-        card_dict = card.to_json()
-        cards_id.append(card_dict)
-
-    response_dict = board.to_dict()
-    response_dict["cards"] = cards_id
-    return jsonify(response_dict), 200
 
 
 @boards_bp.errorhandler(IntegrityError)
