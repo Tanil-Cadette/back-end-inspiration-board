@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.card import Card
-from app.models.board import Board
+
+from sqlalchemy.exc import IntegrityError
 
 cards_bp = Blueprint("cards", __name__, url_prefix="/cards")
-boards_bp = Blueprint("boards", __name__, url_prefix="/boards")
 
 # ==================================
 # Helper function to validate id
@@ -91,3 +91,8 @@ def edit_card_likes(card_id):
     db.session.commit()
 
     return jsonify(card.to_json()), 200
+
+
+@cards_bp.errorhandler(IntegrityError)
+def handle_invalid_data(e):
+    return make_response({"message": "invalid or incomplete card data"}, 400)
