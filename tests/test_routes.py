@@ -2,7 +2,12 @@ from app.models.card import Card
 from app.models.board import Board
 import pytest
 
-# BOARD GET TESTS
+# ==================================================================
+# BOARD ROUTES TESTS
+# ==================================================================
+
+# BOARD GET
+
 def test_get_all_boards_no_saved_boards(client):
     # Act
     response = client.get("/boards")
@@ -12,19 +17,190 @@ def test_get_all_boards_no_saved_boards(client):
     assert response.status_code == 200
     assert response_body == []
 
-def test_get_all_boards(client):
-    pass
+def test_get_all_boards(client, create_four_boards):
+    response = client.get("/boards")
+    response_body = response.get_json()
 
-def test_get_one_board(client):
-    pass
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "board_id": 1,
+            "owner": "Grumpy Cat",
+            "title": "Cats"
+        },
+        {
+            "board_id": 2,
+            "owner": "Snoopy",
+            "title": "Dogs"
+        },
+        {
+            "board_id": 3,
+            "owner": "Toucan",
+            "title": "Birds"
+        },
+        {
+            "board_id": 4,
+            "owner": "Jumper",
+            "title": "Rabbits"
+        }
+    ]
 
-def test_get_all_cards_in_one_board(client):
-    pass
+def test_get_one_board(client, create_one_board):
+    # Act
+    response = client.get("/boards/1")
+    response_body = response.get_json()
 
-def test_get_all_cards_in_one_board_with_no_cards(client):
-    pass
+    # Assert
+    assert response.status_code == 200
+    assert response_body == {
+        "board":{
+            "board_id": 1,
+            "owner": "Grumpy Cat",
+            "title": "Kitty Treats"
+        }   
+    }
 
-# CARD TESTS
+# BOARD-CARD GET
+
+def test_get_all_cards_in_one_board(client, create_four_cards_associated_with_a_board):
+    response = client.get("/boards/1/cards")
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert response_body == {
+        "board_id": 1,
+        "cards": [
+            {
+                "board_id": 1,
+                "card_id": 1,
+                "likes_count": 0,
+                "message": "Message #1"
+            },
+            {
+                "board_id": 1,
+                "card_id": 2,
+                "likes_count": 0,
+                "message": "Card #2"
+            },
+            {
+                "board_id": 1,
+                "card_id": 3,
+                "likes_count": 0,
+                "message": "Hello World"
+            },
+            {
+                "board_id": 1,
+                "card_id": 4,
+                "likes_count": 0,
+                "message": "hello hello"
+            }
+        ],
+        "owner": "Grumpy Cat",
+        "title": "Kitty Treats"
+}
+
+def test_get_all_cards_in_one_board_with_no_cards(client, create_one_board):
+    response = client.get("/boards/1/cards")
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert response_body == {
+        "board_id": 1,
+        "cards": [],
+        "owner": "Grumpy Cat",
+        "title": "Kitty Treats"
+    }
+    
+
+# BOARD-CARD POST
+
+def test_create_cards_in_one_board(client, create_one_board, create_four_cards):
+    response = client.post("/boards/1/cards", json={
+        "card_ids": [1,2,3,4]
+    })
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert response_body == {
+        "board": 1,
+        "cards": [
+            1,
+            2,
+            3,
+            4
+        ]
+    }
+
+    current_board = Board.query.get(1)
+    assert current_board
+    assert len(current_board.cards) == 4
+
+# BOARD POST 
+def test_create_new_board(client):
+    response = client.post("/boards", json={
+        "title": "Best Quotes Ever",
+        "owner": "Me"
+    })
+    response_body = response.get_json()
+
+    assert response.status_code == 201
+    assert response_body == {
+            "board_id": 1,
+            "owner": "Me",
+            "title": "Best Quotes Ever"
+    }
+    new_board = Board.query.get(1)
+    assert new_board
+    assert new_board.owner == "Me"
+    assert new_board.title == "Best Quotes Ever"
+
+# BOARD DELETE
+def test_delete_one_board(client, create_one_board):
+    response = client.delete("/boards/1")
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert "message" in response_body
+    assert response_body == {
+        "message": "Board 1 Kitty Treats was deleted"
+    }
+
+    response = client.get("/boards/1")
+    assert response.status_code == 404
+
+def test_delete_one_board_doesnt_exist(client):
+    response = client.delete("/boards/1")
+    response_body = response.get_json()
+
+    assert response.status_code == 404
+    assert response_body == {
+        "message": "Board 1 not found"
+    }
+
+    assert Board.query.all() == []
+
+# BOARD UPDATE (PUT)
+
+def test_update_board_title_and_owner(client, create_one_board):
+    response = client.put("/boards/1", json={
+        "title": "Cat Quotes",
+        "owner": "Cat"
+    })
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert response_body == {
+        "board": {
+            "board_id": 1,
+            "owner": "Cat",
+            "title": "Cat Quotes"
+        }
+    }
+    
+
+# ==================================================================
+# CARD ROUTES TESTS
+# ==================================================================
 
 # CARD DELETE
 
@@ -98,6 +274,7 @@ def test_get_one_card_doesnt_exist(client):
     }
 
 # CARD POST 
+
 def test_create_one_card_in_one_board(client, create_one_board):
     response = client.post("/cards", json={
         "message": "this is a test card",

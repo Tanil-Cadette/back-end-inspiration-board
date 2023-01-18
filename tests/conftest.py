@@ -30,6 +30,16 @@ def create_one_board(app):
     db.session.commit()
 
 @pytest.fixture
+def create_four_boards(app):
+    db.session.add_all([
+        Board(title="Cats", owner="Grumpy Cat"),
+        Board(title="Dogs",owner="Snoopy"),
+        Board(title="Birds",owner="Toucan"),
+        Board(title="Rabbits",owner="Jumper")
+    ])
+    db.session.commit()
+
+@pytest.fixture
 def create_four_cards(app):
     db.session.add_all([
         Card(message="Message #1"),
