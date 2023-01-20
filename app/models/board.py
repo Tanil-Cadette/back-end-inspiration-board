@@ -5,6 +5,7 @@ class Board(db.Model):
     board_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     owner = db.Column(db.String, nullable=False)
+    color = db.Column(db.Integer)
     cards = db.relationship("Card", back_populates="board")
 
     @db.validates("title", "owner")
@@ -12,6 +13,15 @@ class Board(db.Model):
         value = str(value).strip()
         if not value:
             raise ValueError(f"{key} must be a non-empty string.")
+        return value
+
+    @db.validates("color")
+    def color_24bit(self, key, value):
+        if value is None:
+            return value  # nullable=True
+        value = int(value)
+        if value < 0 or value > (256**3):
+            raise ValueError(f"{key} must be a 24-bit integer.")
         return value
 
     def to_dict(self):
@@ -25,3 +35,10 @@ class Board(db.Model):
     @classmethod
     def from_dict(cls, board_data):
         return Board(**Board.filter_data(board_data))
+
+    def update(self, board_data):
+        for field, value in Board.filter_data(board_data).items():
+            setattr(self, field, value)
+
+    def set_color(self, color):
+        self.color = color

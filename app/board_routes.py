@@ -68,6 +68,27 @@ def read_board_cards(board_id):
     return jsonify(response), 200
 
 
+# __________________________________________________________________________________________________________
+# --------------------------------COLOR ROUTES---------------------------------------------------------------
+# __________________________________________________________________________________________________________
+@boards_bp.route("/<board_id>/color", methods=["GET"])
+def set_board_color(board_id):
+    board = validate_model(Board, board_id)
+    board_dict = board.to_dict(color=True)
+    db.session.commit()
+    return make_response(jsonify({"board": board_dict}))
+
+
+@boards_bp.route("/<board_id>/color", methods=["POST"])
+def get_board_color(board_id):
+    board = validate_model(Board, board_id)
+    request_body = request.get_json()
+    board.set_color(request_body["color"])
+    board_dict = board.to_dict(color=True)
+    db.session.commit()
+    return make_response(jsonify({"board": board_dict}))
+
+
 # ____________________________________________________________________________________________________________
 # --------------------------------DELETE BOARD----------------------------------------------------------------
 # ____________________________________________________________________________________________________________
