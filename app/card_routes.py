@@ -30,7 +30,7 @@ def create_card():
     try:
         new_card= Card.create(request_body)
     except:
-        if "message" not in request_body:
+        if "message" not in request_body or "board_id" not in request_body:
             return make_response({"details": "Invalid data"}, 400)
         
     new_card= Card.create(request_body)

@@ -272,3 +272,14 @@ def test_create_one_card_in_one_board(client, create_one_board):
     assert new_card
     assert new_card.message == "this is a test card"
     assert new_card.likes_count == 0
+
+def test_try_to_create_one_card_without_board_id(client):
+    response = client.post("/cards", json={
+        "message": "this is a test card"
+    })
+    response_body = response.get_json()
+
+    assert response.status_code == 400
+    assert response_body == {
+        "details": "Invalid data"
+    }
