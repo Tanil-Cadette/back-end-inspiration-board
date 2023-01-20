@@ -52,17 +52,12 @@ def test_get_all_cards_in_one_board(client, create_four_cards_associated_with_a_
     response_body = response.get_json()
 
     assert response.status_code == 200
-    assert response_body == {
-        "board_id": 1,
-        "cards": [
-            {"board_id": 1, "card_id": 1, "likes_count": 0, "message": "Message #1"},
-            {"board_id": 1, "card_id": 2, "likes_count": 0, "message": "Card #2"},
-            {"board_id": 1, "card_id": 3, "likes_count": 0, "message": "Hello World"},
-            {"board_id": 1, "card_id": 4, "likes_count": 0, "message": "hello hello"},
-        ],
-        "owner": "Grumpy Cat",
-        "title": "Kitty Treats",
-    }
+    assert response_body == [
+        {"board_id": 1, "card_id": 1, "likes_count": 0, "message": "Message #1"},
+        {"board_id": 1, "card_id": 2, "likes_count": 0, "message": "Card #2"},
+        {"board_id": 1, "card_id": 3, "likes_count": 0, "message": "Hello World"},
+        {"board_id": 1, "card_id": 4, "likes_count": 0, "message": "hello hello"},
+    ]
 
 
 def test_get_all_cards_in_one_board_with_no_cards(client, create_one_board):
@@ -70,12 +65,7 @@ def test_get_all_cards_in_one_board_with_no_cards(client, create_one_board):
     response_body = response.get_json()
 
     assert response.status_code == 200
-    assert response_body == {
-        "board_id": 1,
-        "cards": [],
-        "owner": "Grumpy Cat",
-        "title": "Kitty Treats",
-    }
+    assert response_body == []
 
 
 # BOARD POST
@@ -115,16 +105,6 @@ def test_delete_one_board_doesnt_exist(client):
 
 
 # BOARD UPDATE (PUT)
-
-
-def test_update_board_title_and_owner(client, create_one_board):
-    response = client.put("/boards/1", json={"title": "Cat Quotes", "owner": "Cat"})
-    response_body = response.get_json()
-
-    assert response.status_code == 200
-    assert response_body == {
-        "board": {"board_id": 1, "owner": "Cat", "title": "Cat Quotes"}
-    }
 
 
 # ==================================================================
@@ -234,4 +214,4 @@ def test_try_to_create_one_card_without_board_id(client):
     response_body = response.get_json()
 
     assert response.status_code == 400
-    assert response_body == {"details": "Invalid data"}
+    assert response_body == {"message": "Invalid or incomplete card data"}

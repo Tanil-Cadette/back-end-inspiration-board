@@ -81,5 +81,6 @@ def edit_card_likes(card_id):
 
 
 @cards_bp.errorhandler(IntegrityError)
+@cards_bp.errorhandler(KeyError)
 def handle_invalid_data(e):
-    return make_response({"message": "invalid or incomplete card data"}, 400)
+    return make_response({"message": "Invalid or incomplete card data"}, 400)
