@@ -1,11 +1,13 @@
 from app import db
 
+from random import randint
+
 
 class Board(db.Model):
     board_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     owner = db.Column(db.String, nullable=False)
-    color = db.Column(db.Integer)
+    color = db.Column(db.Integer, default=lambda: randint(0, 256**3), nullable=False)
     cards = db.relationship("Card", back_populates="board")
 
     @db.validates("title", "owner")
@@ -23,12 +25,12 @@ class Board(db.Model):
             value = "".join(filter(lambda v: v in "0123456789abcdefABCDEF", value))
             value = int(value, 16)
 
+        if value is None:
+            return randint(0, 256**3)
+
         if isinstance(value, int):
             if value < 0 or value > (256**3):
                 raise colorError
-            return value
-
-        if value is None:
             return value
 
         raise colorError
