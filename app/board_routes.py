@@ -72,7 +72,7 @@ def read_board_cards(board_id):
 # --------------------------------COLOR ROUTES---------------------------------------------------------------
 # __________________________________________________________________________________________________________
 @boards_bp.route("/<board_id>/color", methods=["GET"])
-def set_board_color(board_id):
+def get_board_color(board_id):
     board = validate_model(Board, board_id)
     board_dict = board.to_dict(color=True)
     db.session.commit()
@@ -80,7 +80,7 @@ def set_board_color(board_id):
 
 
 @boards_bp.route("/<board_id>/color", methods=["POST"])
-def get_board_color(board_id):
+def set_board_color(board_id):
     board = validate_model(Board, board_id)
     request_body = request.get_json()
     board.set_color(request_body["color"])
@@ -97,6 +97,9 @@ def delete_board(board_id):
     board = validate_model(Board, board_id)
     board_dict = board.to_dict()
 
+    for card in board.cards:
+        db.session.delete(card)
+
     db.session.delete(board)
     db.session.commit()
 
@@ -104,5 +107,6 @@ def delete_board(board_id):
 
 
 @boards_bp.errorhandler(IntegrityError)
+@boards_bp.errorhandler(ValueError)
 def handle_invalid_data(e):
     return make_response({"message": "invalid or incomplete board data"}, 400)

@@ -17,12 +17,21 @@ class Board(db.Model):
 
     @db.validates("color")
     def color_24bit(self, key, value):
+        colorError = ValueError(f"{key} must represent a 24-bit color.")
+
+        if isinstance(value, str):
+            value = "".join(filter(lambda v: v in "0123456789abcdefABCDEF", value))
+            value = int(value, 16)
+
+        if isinstance(value, int):
+            if value < 0 or value > (256**3):
+                raise colorError
+            return value
+
         if value is None:
-            return value  # nullable=True
-        value = int(value)
-        if value < 0 or value > (256**3):
-            raise ValueError(f"{key} must be a 24-bit integer.")
-        return value
+            return value
+
+        raise colorError
 
     def to_dict(self, color=False):
         board_dict = {
@@ -31,7 +40,7 @@ class Board(db.Model):
             "owner": self.owner,
         }
         if color:
-            board_dict["color"] = self.color
+            board_dict["color"] = f"#{self.color:0>6X}"
         return board_dict
 
     @classmethod
