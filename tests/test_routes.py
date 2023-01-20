@@ -110,30 +110,6 @@ def test_get_all_cards_in_one_board_with_no_cards(client, create_one_board):
         "owner": "Grumpy Cat",
         "title": "Kitty Treats"
     }
-    
-
-# BOARD-CARD POST
-
-def test_create_cards_in_one_board(client, create_one_board, create_four_cards):
-    response = client.post("/boards/1/cards", json={
-        "card_ids": [1,2,3,4]
-    })
-    response_body = response.get_json()
-
-    assert response.status_code == 200
-    assert response_body == {
-        "board": 1,
-        "cards": [
-            1,
-            2,
-            3,
-            4
-        ]
-    }
-
-    current_board = Board.query.get(1)
-    assert current_board
-    assert len(current_board.cards) == 4
 
 # BOARD POST 
 def test_create_new_board(client):
@@ -237,7 +213,7 @@ def test_patch_one_card_likes_count(client, create_card_with_likes):
     #Assert
     assert response.status_code == 200
     assert response_body == {
-        "board_id": None,
+        "board_id": 1,
         "card_id": 1,
         "likes_count": 31,
         "message": "testing testing 123"
@@ -256,7 +232,7 @@ def test_get_one_card_by_id(client, create_one_card):
     assert response.status_code == 200
     assert response_body == {
         "card": {
-            "board_id": None,
+            "board_id": 1,
             "card_id": 1,
             "likes_count": 0,
             "message": "testing testing 123"

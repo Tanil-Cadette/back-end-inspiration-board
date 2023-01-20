@@ -40,31 +40,23 @@ def create_four_boards(app):
     db.session.commit()
 
 @pytest.fixture
-def create_four_cards(app):
+def create_four_cards_associated_with_a_board(app, create_one_board):
     db.session.add_all([
-        Card(message="Message #1"),
-        Card(message="Card #2"),
-        Card(message="Hello World"),
-        Card(message="hello hello")
+        Card(message="Message #1", board_id=1),
+        Card(message="Card #2", board_id=1),
+        Card(message="Hello World", board_id=1),
+        Card(message="hello hello", board_id=1)
     ])
     db.session.commit()
 
 @pytest.fixture
-def create_four_cards_associated_with_a_board(app, create_one_board, create_four_cards):
-    board = Board.query.first()
-    cards = Card.query.all()
-    for card in cards:
-        board.cards.append(card)
-    db.session.commit()
-
-@pytest.fixture
-def create_one_card(app):
-    new_card = Card(message="testing testing 123")
+def create_one_card(app, create_one_board):
+    new_card = Card(message="testing testing 123", board_id=1)
     db.session.add(new_card)
     db.session.commit()
 
 @pytest.fixture
-def create_card_with_likes(app):
-    new_card = Card(message="testing testing 123", likes_count=30)
+def create_card_with_likes(app, create_one_board):
+    new_card = Card(message="testing testing 123", likes_count=30, board_id=1)
     db.session.add(new_card)
     db.session.commit() 
