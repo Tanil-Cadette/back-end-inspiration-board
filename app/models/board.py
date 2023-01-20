@@ -24,8 +24,15 @@ class Board(db.Model):
             raise ValueError(f"{key} must be a 24-bit integer.")
         return value
 
-    def to_dict(self):
-        return {"board_id": self.board_id, "title": self.title, "owner": self.owner}
+    def to_dict(self, color=False):
+        board_dict = {
+            "board_id": self.board_id,
+            "title": self.title,
+            "owner": self.owner,
+        }
+        if color:
+            board_dict["color"] = self.color
+        return board_dict
 
     @classmethod
     def filter_data(cls, board_data):
